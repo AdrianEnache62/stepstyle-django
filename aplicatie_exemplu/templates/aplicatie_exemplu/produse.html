@@ -1,0 +1,120 @@
+{% extends "aplicatie_exemplu/baza.html" %}
+{% load static %}
+
+{% block content %}
+<div style="max-width: 1100px; margin: 20px auto; padding: 0 16px;">
+
+    {% if categorie_curenta %}
+        <div style="padding: 16px; border-left: 6px solid {{ categorie_curenta.culoare }}; background: #f8f9fa; margin-bottom: 20px; border-radius: 6px;">
+            <h1 style="margin: 0; color: {{ categorie_curenta.culoare }};">
+                <i class="fa-solid {{ categorie_curenta.icon }}"></i> {{ categorie_curenta.nume }}
+            </h1>
+            {% if categorie_curenta.descriere %}
+                <p style="margin-top: 8px;">{{ categorie_curenta.descriere }}</p>
+            {% endif %}
+        </div>
+    {% else %}
+        <h1>Toate produsele</h1>
+    {% endif %}
+
+    <form method="get" style="margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        {% for t in taguri_active %}
+            <input type="hidden" name="tag" value="{{ t }}">
+        {% endfor %}
+        <label>Sortează după:</label>
+        <select name="coloana">
+            <option value="nume" {% if coloana == 'nume' %}selected{% endif %}>Nume</option>
+            <option value="pret" {% if coloana == 'pret' %}selected{% endif %}>Preț</option>
+            <option value="data_adaugarii" {% if coloana == 'data_adaugarii' %}selected{% endif %}>Data adăugării</option>
+            <option value="stoc" {% if coloana == 'stoc' %}selected{% endif %}>Stoc</option>
+        </select>
+        <select name="sort">
+            <option value="">-- Ordine --</option>
+            <option value="a" {% if sort == 'a' %}selected{% endif %}>Ascendent (A-Z / Mic-Mare)</option>
+            <option value="d" {% if sort == 'd' %}selected{% endif %}>Descendent (Z-A / Mare-Mic)</option>
+        </select>
+        <button type="submit">Aplică</button>
+    </form>
+
+    {% if taguri_cu_link_eliminare %}
+        <div style="margin-bottom: 16px;">
+            <strong>Taguri active:</strong>
+            {% for tag, qs_fara_tag in taguri_cu_link_eliminare %}
+                <a href="?{{ qs_fara_tag }}" style="display: inline-block; background: #1f2937; color: #fff; padding: 4px 10px; border-radius: 14px; text-decoration: none; margin-right: 6px; font-size: 0.9em;">
+                    #{{ tag }} &times;
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if total_produse > 0 %}
+        <p>Se afișează produsele între <strong>{{ pagina.start_index }}</strong> și <strong>{{ pagina.end_index }}</strong> din totalul de <strong>{{ total_produse }}</strong> produse.</p>
+
+        <div style="margin-bottom: 16px;">
+            <span>Pagina {{ pagina.number }} din {{ pagina.paginator.num_pages }}</span>
+            {% if pagina.has_previous %}
+                | <a href="?{% if qs_baza %}{{ qs_baza }}&{% endif %}pagina={{ pagina.previous_page_number }}">&laquo; Anterior</a>
+            {% endif %}
+            {% if pagina.has_next %}
+                | <a href="?{% if qs_baza %}{{ qs_baza }}&{% endif %}pagina={{ pagina.next_page_number }}">Următor &raquo;</a>
+            {% endif %}
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+            {% for prod in pagina.object_list %}
+                <div style="border: 2px solid {{ prod.categorie.culoare }}; border-radius: 10px; padding: 14px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                    {% if prod.imagine_principala and prod.imagine_principala.imagine %}
+                        <img src="{{ prod.imagine_principala.imagine.url }}" alt="{{ prod.imagine_principala.alt_text }}" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px;">
+                    {% else %}
+                        <img src="{% static 'aplicatie_exemplu/imagini/imagine_indisponibila.png' %}" alt="Imagine indisponibilă" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px;">
+                    {% endif %}
+
+                    <h3 style="margin: 10px 0 6px;">
+                        <a href="{{ prod.get_absolute_url }}" style="text-decoration: none; color: #111;">{{ prod.nume }}</a>
+                    </h3>
+
+                    <p style="margin: 4px 0;">
+                        <a href="{% url 'produse_categorie' prod.categorie.nume %}" style="color: {{ prod.categorie.culoare }}; font-weight: bold; text-decoration: none;">
+                            <i class="fa-solid {{ prod.categorie.icon }}"></i> {{ prod.categorie.nume }}
+                        </a>
+                    </p>
+
+                    <p style="margin: 4px 0;"><strong>Brand:</strong> {{ prod.brand.nume }}</p>
+                    <p style="margin: 4px 0;"><strong>Preț:</strong> {{ prod.pret }} RON</p>
+
+                    {% if prod.stoc < stoc_min %}
+                        <p style="color: #dc2626; font-weight: bold; border: 1px solid #dc2626; padding: 3px 8px; border-radius: 4px; display: inline-block; font-size: 0.85em;">
+                            ⚠ Stoc limitat ({{ prod.stoc }} buc.)
+                        </p>
+                    {% endif %}
+
+                    {% if prod.taguri %}
+                        <div style="margin-top: 8px;">
+                            {% for t in prod.taguri %}
+                                {% if t not in taguri_active %}
+                                    <a href="?{% if qs_baza %}{{ qs_baza }}&{% endif %}tag={{ t }}" style="display: inline-block; background: #e5e7eb; color: #111; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; text-decoration: none; margin: 2px;">#{{ t }}</a>
+                                {% else %}
+                                    <span style="display: inline-block; background: #1f2937; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; margin: 2px;">#{{ t }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 20px;">
+            <span>Pagina {{ pagina.number }} din {{ pagina.paginator.num_pages }}</span>
+            {% if pagina.has_previous %}
+                | <a href="?{% if qs_baza %}{{ qs_baza }}&{% endif %}pagina={{ pagina.previous_page_number }}">&laquo; Anterior</a>
+            {% endif %}
+            {% if pagina.has_next %}
+                | <a href="?{% if qs_baza %}{{ qs_baza }}&{% endif %}pagina={{ pagina.next_page_number }}">Următor &raquo;</a>
+            {% endif %}
+        </div>
+    {% else %}
+        <p>Nu există produse care să corespundă criteriilor selectate.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,4 +1,7 @@
 from django.db import models
+from django.urls import reverse
+from django.contrib.postgres.fields import ArrayField
+from django.db import models
 
 
 class Categorie(models.Model):
@@ -10,6 +13,11 @@ class Categorie(models.Model):
             'blank': "Numele categoriei nu poate fi gol.",
             'max_length': "Numele categoriei nu poate depăși 100 de caractere.",
         },
+    )
+    icon = models.CharField(
+        max_length=50,
+        default='fa-shoe-prints',
+        help_text="Clasă FontAwesome (ex: fa-running, fa-socks, fa-shoe-prints).",
     )
     descriere = models.TextField(null=True, blank=True)
     culoare = models.CharField(
@@ -152,6 +160,13 @@ class Produs(models.Model):
         UNISEX = 'unisex', 'Unisex'
 
     nume = models.CharField(max_length=100)
+    stoc = models.PositiveIntegerField(default=10)
+    taguri = ArrayField(
+        models.CharField(max_length=50),
+        default=list,
+        blank=True,
+        help_text="Cuvinte cheie separate prin virgulă (ex: sport, piele, vara).",
+    )
     cod_produs = models.CharField(
         max_length=50,
         unique=True,
@@ -181,7 +196,6 @@ class Produs(models.Model):
     )
     data_adaugarii = models.DateTimeField(auto_now_add=True)
 
-    # Relații
     categorie = models.ForeignKey(Categorie, on_delete=models.CASCADE, related_name='produse')
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='produse')
     imagine_principala = models.OneToOneField(
@@ -214,3 +228,6 @@ class Produs(models.Model):
 
     def __str__(self):
         return f"{self.nume} ({self.cod_produs}) - {self.pret} RON"
+    
+    def get_absolute_url(self):
+        return reverse('detaliu_produs', kwargs={'pk': self.pk})

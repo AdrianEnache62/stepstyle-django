@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'aplicatie_exemplu',
 ]
 
@@ -56,14 +57,15 @@ ROOT_URLCONF = 'nume_proiect.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'aplicatie_exemplu.ctx_processors.date_firma'
+                'aplicatie_exemplu.ctx_processors.date_firma',
+                'aplicatie_exemplu.context_processors.categorii_meniu',
             ],
         },
     },
@@ -147,3 +149,7 @@ DATE_FIRMA = {
     'email': 'contact@stepstyle.ro',
     'cui': 'RO12345678',
 }
+
+STOC_MIN = 5            
+PROD_PER_PAG = 5        
+K_PRODUSE_SIMILARE = 3  

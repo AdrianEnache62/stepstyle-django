@@ -1,0 +1,74 @@
+{% extends "aplicatie_exemplu/baza.html" %}
+{% load static %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 20px auto; padding: 0 16px;">
+    <a href="{% url 'produse' %}">&laquo; Înapoi la toate produsele</a>
+
+    <div style="display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 280px;">
+            {% if produs.imagine_principala and produs.imagine_principala.imagine %}
+                <img src="{{ produs.imagine_principala.imagine.url }}" alt="{{ produs.imagine_principala.alt_text }}" style="width: 100%; border-radius: 10px;">
+            {% else %}
+                <img src="{% static 'aplicatie_exemplu/imagini/imagine_indisponibila.png' %}" alt="Imagine indisponibilă" style="width: 100%; border-radius: 10px;">
+            {% endif %}
+        </div>
+
+        <div style="flex: 1; min-width: 280px;">
+            <h1>{{ produs.nume }}</h1>
+            <p>
+                <strong>Categorie:</strong>
+                <a href="{% url 'produse_categorie' produs.categorie.nume %}" style="color: {{ produs.categorie.culoare }}; font-weight: bold;">
+                    <i class="fa-solid {{ produs.categorie.icon }}"></i> {{ produs.categorie.nume }}
+                </a>
+            </p>
+            <p><strong>Cod produs:</strong> {{ produs.cod_produs }}</p>
+            <p><strong>Brand:</strong> {{ produs.brand.nume }} ({{ produs.brand.tara_origine }})</p>
+            <p><strong>Gen:</strong> {{ produs.get_gen_display }}</p>
+            <p><strong>Preț:</strong> <span style="font-size: 1.3em; font-weight: bold;">{{ produs.pret }} RON</span></p>
+            <p><strong>Stoc disponibil:</strong> {{ produs.stoc }} buc.
+                {% if produs.stoc < stoc_min %}
+                    <span style="color: #dc2626; font-weight: bold;">(⚠ Stoc limitat!)</span>
+                {% endif %}
+            </p>
+            {% if produs.descriere %}
+                <p><strong>Descriere:</strong> {{ produs.descriere }}</p>
+            {% endif %}
+
+            <p><strong>Mărimi disponibile:</strong>
+                {% for m in produs.marimi.all %}{{ m.marime_eu }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </p>
+            <p><strong>Materiale:</strong>
+                {% for mat in produs.materiale.all %}{{ mat.nume }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </p>
+
+            {% if produs.taguri %}
+                <div style="margin-top: 12px;">
+                    <strong>Taguri:</strong>
+                    {% for t in produs.taguri %}
+                        <a href="{% url 'produse' %}?tag={{ t }}" style="display: inline-block; background: #e5e7eb; color: #111; padding: 3px 10px; border-radius: 12px; text-decoration: none; margin: 2px;">#{{ t }}</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if produse_similare %}
+        <hr style="margin: 30px 0;">
+        <h2>Produse din aceeași categorie</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px;">
+            {% for sim in produse_similare %}
+                <a href="{{ sim.get_absolute_url }}" style="text-decoration: none; color: inherit; border: 1px solid #ddd; border-radius: 8px; padding: 10px; display: block;">
+                    {% if sim.imagine_principala and sim.imagine_principala.imagine %}
+                        <img src="{{ sim.imagine_principala.imagine.url }}" alt="{{ sim.nume }}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 6px;">
+                    {% else %}
+                        <img src="{% static 'aplicatie_exemplu/imagini/imagine_indisponibila.png' %}" alt="Imagine indisponibilă" style="width: 100%; height: 140px; object-fit: cover; border-radius: 6px;">
+                    {% endif %}
+                    <h4 style="margin: 8px 0 4px;">{{ sim.nume }}</h4>
+                    <p style="margin: 0; font-weight: bold;">{{ sim.pret }} RON</p>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
