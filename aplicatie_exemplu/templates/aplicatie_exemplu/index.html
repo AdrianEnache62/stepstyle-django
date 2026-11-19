@@ -1,0 +1,23 @@
+{% extends "aplicatie_exemplu/baza.html"%}
+{% load static %}
+
+{% block title %}Acasă - Magazin de Încălțăminte{% endblock %}
+
+{% block content %}
+    <section id="welcome">
+        <h2>Bine ați venit!</h2>
+        <p>Acest site comercializează o gamă variată de încălțăminte pentru bărbați, femei și copii:
+        pantofi sport, ghete de iarnă, pantofi eleganți și sandale, disponibile în toate mărimile.</p>
+        <img src="{% static 'imagini/magazin.jpg' %}" alt="Magazin de încălțăminte" style="max-width: 100%; border-radius: 8px; margin-top: 10px;">
+    </section>
+
+    <section id="promotii">
+        <h2>Promoții curente</h2>
+        <p>Reduceri de sezon de până la 30% la toată colecția de adidași și ghete.</p>
+    </section>
+
+    <section id="orar">
+        <h2>Orar și program</h2>
+        <p>Luni - Vineri: 09:00 - 20:00 | Sâmbătă: 10:00 - 16:00 | Duminică: Închis</p>
+    </section>
+{% endblock %}

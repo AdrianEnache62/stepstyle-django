@@ -1,0 +1,112 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    color: #222;
+    line-height: 1.6;
+}
+
+header {
+    background-color: #1f2937;
+    color: white;
+    padding: 15px 25px;
+}
+
+header h1 {
+    margin-bottom: 12px;
+    font-size: 1.8rem;
+}
+
+.meniu ul {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.meniu > ul > li {
+    position: relative;
+}
+
+.meniu a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    background-color: #374151;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.meniu a:hover {
+    background-color: #2563eb;
+}
+
+.meniu .submeniu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 190px;
+    flex-direction: column;
+    gap: 0;
+    z-index: 100;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.meniu li:hover > .submeniu {
+    display: flex;
+}
+
+.meniu .submeniu a {
+    border-radius: 0;
+    background-color: #4b5563;
+}
+
+.meniu .submeniu a:hover {
+    background-color: #1d4ed8;
+}
+
+main {
+    color: #222;
+    max-width: 1000px;
+    margin: 25px auto;
+    padding: 25px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+main section {
+    margin-bottom: 25px;
+}
+
+main h2 {
+    margin-bottom: 10px;
+    color: #1f2937;
+}
+
+footer {
+    background-color: #1f2937;
+    color: #d1d5db;
+    text-align: center;
+    padding: 15px;
+    margin-top: 30px;
+}
+
+@media (max-width: 768px) {
+    .meniu ul {
+        flex-direction: column;
+    }
+
+    .meniu .submeniu {
+        position: static;
+        box-shadow: none;
+        padding-left: 15px;
+    }
+}

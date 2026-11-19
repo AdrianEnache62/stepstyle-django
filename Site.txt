@@ -1,0 +1,5 @@
+python manage.py runserver
+http://127.0.0.1:8000/aplicatie_exemplu/
+http://127.0.0.1:8000/aplicatie_exemplu/info
+http://127.0.0.1:8000/aplicatie_exemplu/info?data=zi
+http://127.0.0.1:8000/aplicatie_exemplu/info?data=timp

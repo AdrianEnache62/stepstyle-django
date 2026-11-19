@@ -1,0 +1,17 @@
+{% extends "aplicatie_exemplu/baza.html" %}
+{% load static %}
+
+{% block title %}Despre noi - Magazin de Încălțăminte{% endblock %}
+
+{% block content %}
+    <section id="cine-suntem">
+        <h2>Cine suntem</h2>
+        <p>StepStyle Încălțăminte este un magazin dedicat confortului și calității, oferind modele atent selecționate de la branduri de top.</p>
+        <img src="{% static 'imagini/echipa.jpg' %}" alt="Despre magazinul nostru" style="max-width: 100%; border-radius: 8px; margin-top: 10px;">
+    </section>
+
+    <section id="valori">
+        <h2>Valorile noastre</h2>
+        <p>Punem accent pe durabilitate, livrare rapidă și consultanță pentru alegerea mărimii potrivite.</p>
+    </section>
+{% endblock %}
