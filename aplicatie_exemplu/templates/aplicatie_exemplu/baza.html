@@ -2,6 +2,50 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
+    <style>
+        .messages-container {
+            list-style: none;
+            padding: 0;
+            margin: 16px auto;
+            max-width: 1100px;
+        }
+        .messages-container li {
+            padding: 12px 18px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            font-family: system-ui, sans-serif;
+            font-size: 0.95rem;
+            border-left: 6px solid;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+        .msg-debug {
+            background: #f3f4f6;
+            color: #374151;
+            border-color: #6b7280;
+            font-family: monospace;
+        }
+        .msg-info {
+            background: #eff6ff;
+            color: #1e40af;
+            border-color: #3b82f6;
+        }
+        .msg-success {
+            background: #ecfdf5;
+            color: #065f46;
+            border-color: #10b981;
+        }
+        .msg-warning {
+            background: #fffbeb;
+            color: #92400e;
+            border-color: #f59e0b;
+        }
+        .msg-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border-color: #ef4444;
+            font-weight: 600;
+        }
+    </style>
     <meta charset="UTF-8">
     <title>{% block title %}Magazin de Încălțăminte{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/nav.css' %}">
@@ -62,6 +106,13 @@
     </nav>
     </header>
     <main>
+        {% if messages %}
+            <ul class="messages-container">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
         {% block content %}
         {% endblock %}
     </main>

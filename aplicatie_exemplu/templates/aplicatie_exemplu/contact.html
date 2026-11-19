@@ -1,0 +1,168 @@
+{% extends "aplicatie_exemplu/baza.html" %}
+
+{% block content %}
+<div style="max-width: 780px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+    <h1>Contact StepStyle</h1>
+
+    <form method="post" enctype="multipart/form-data" id="contact-form" novalidate>
+        {% csrf_token %}
+        {{ form.cod_cerere }}
+
+        {% if form.non_field_errors %}
+            <div style="color: #dc2626; margin-bottom: 12px;">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div style="display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap;">
+            <div style="flex: 1;">
+                {{ form.nume.label_tag }} {{ form.nume }}
+                <div style="color: #dc2626; font-size: 0.85em;">{{ form.nume.errors }}</div>
+            </div>
+            <div style="flex: 1;">
+                {{ form.prenume.label_tag }} {{ form.prenume }}
+                <small style="display: block; color: #555;">{{ form.prenume.help_text }}</small>
+                <div style="color: #dc2626; font-size: 0.85em;">{{ form.prenume.errors }}</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            {{ form.cnp.label_tag }} {{ form.cnp }}
+            <span id="cnp-contor" style="margin-left: 8px; font-weight: bold; color: #1e40af;">0 / 13 cifre</span>
+            <div style="color: #dc2626; font-size: 0.85em;">{{ form.cnp.errors }}</div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            {{ form.data_nasterii.label_tag }} {{ form.data_nasterii }}
+            <div style="color: #dc2626; font-size: 0.85em;">{{ form.data_nasterii.errors }}</div>
+        </div>
+
+        <div style="display: flex; gap: 16px; margin-bottom: 14px; flex-wrap: wrap;">
+            <div style="flex: 1;">
+                {{ form.email.label_tag }} {{ form.email }}
+                <div style="color: #dc2626; font-size: 0.85em;">{{ form.email.errors }}</div>
+            </div>
+            <div style="flex: 1;">
+                {{ form.confirm_email.label_tag }} {{ form.confirm_email }}
+                <div style="color: #dc2626; font-size: 0.85em;">{{ form.confirm_email.errors }}</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            {{ form.telefon.label_tag }} {{ form.telefon }}
+            <small style="display: block; color: #555;">{{ form.telefon.help_text }}</small>
+            <div style="color: #dc2626; font-size: 0.85em;">{{ form.telefon.errors }}</div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            {{ form.tip_mesaj.label_tag }} {{ form.tip_mesaj }}
+            <div style="color: #dc2626; font-size: 0.85em;">{{ form.tip_mesaj.errors }}</div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            {{ form.departament.label_tag }} {{ form.departament }}
+            <div style="color: #dc2626; font-size: 0.85em;">{{ form.departament.errors }}</div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            {{ form.subiect.label_tag }} {{ form.subiect }}
+            <div style="color: #dc2626; font-size: 0.85em;">{{ form.subiect.errors }}</div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            {{ form.min_zile_asteptare.label_tag }}<br>
+            {{ form.min_zile_asteptare }}
+            <div style="color: #dc2626; font-size: 0.85em;">{{ form.min_zile_asteptare.errors }}</div>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            {{ form.mesaj.label_tag }}<br>
+            {{ form.mesaj }}
+            <div style="color: #dc2626; font-size: 0.85em;">{{ form.mesaj.errors }}</div>
+        </div>
+
+        <div style="margin-bottom: 14px; padding: 12px; background: #f8f9fa; border-radius: 6px;">
+            <strong>Imagini asociate (opțional, max. 3):</strong>
+            <div id="wrap-img-1" style="margin-top: 8px;">{{ form.imagine_1.label_tag }} {{ form.imagine_1 }}</div>
+            <div id="wrap-img-2" style="margin-top: 8px; display: none;">{{ form.imagine_2.label_tag }} {{ form.imagine_2 }}</div>
+            <div id="wrap-img-3" style="margin-top: 8px; display: none;">{{ form.imagine_3.label_tag }} {{ form.imagine_3 }}</div>
+            <p id="msg-max-img" style="display: none; color: #065f46; font-weight: bold; margin-top: 8px;">
+                Ați atins numărul maxim de 3 imagini atașate.
+            </p>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            {{ form.acord_gdpr }} {{ form.acord_gdpr.label_tag }}
+            <div style="color: #dc2626; font-size: 0.85em;">{{ form.acord_gdpr.errors }}</div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+            <button type="submit" id="btn-submit" disabled style="padding: 10px 20px; cursor: pointer;">Trimite mesajul</button>
+            <button type="reset" id="btn-reset" style="padding: 10px 20px; cursor: pointer;">Resetează</button>
+        </div>
+    </form>
+</div>
+
+<script>
+const hartaDepartamente = {{ harta_departamente_json|safe }};
+
+const cnpInput = document.getElementById('id_cnp');
+const cnpContor = document.getElementById('cnp-contor');
+function actualizeazaContorCnp() {
+    const cifre = (cnpInput.value.match(/\d/g) || []).length;
+    cnpContor.textContent = cifre + ' / 13 cifre';
+}
+cnpInput.addEventListener('input', actualizeazaContorCnp);
+actualizeazaContorCnp();
+
+const tipSelect = document.getElementById('id_tip_mesaj');
+const depSelect = document.getElementById('id_departament');
+const depInitial = depSelect.value;
+
+function actualizeazaDepartamente(pastreazaSelectia) {
+    const tip = tipSelect.value;
+    const permise = hartaDepartamente[tip] || [];
+    const curent = pastreazaSelectia ? depInitial : depSelect.value;
+    depSelect.innerHTML = '<option value="neselectat">neselectat</option>';
+    permise.forEach(dep => {
+        const opt = document.createElement('option');
+        opt.value = dep;
+        opt.textContent = dep;
+        if (dep === curent) opt.selected = true;
+        depSelect.appendChild(opt);
+    });
+}
+tipSelect.addEventListener('change', () => actualizeazaDepartamente(false));
+actualizeazaDepartamente(true);
+
+const img1 = document.getElementById('id_imagine_1');
+const img2 = document.getElementById('id_imagine_2');
+const img3 = document.getElementById('id_imagine_3');
+img1.addEventListener('change', () => {
+    document.getElementById('wrap-img-2').style.display = img1.files.length ? 'block' : 'none';
+});
+img2.addEventListener('change', () => {
+    document.getElementById('wrap-img-3').style.display = img2.files.length ? 'block' : 'none';
+});
+img3.addEventListener('change', () => {
+    document.getElementById('msg-max-img').style.display = img3.files.length ? 'block' : 'none';
+});
+
+const gdprCheck = document.getElementById('id_acord_gdpr');
+const btnSubmit = document.getElementById('btn-submit');
+function actualizeazaSubmit() {
+    btnSubmit.disabled = !gdprCheck.checked;
+}
+gdprCheck.addEventListener('change', actualizeazaSubmit);
+actualizeazaSubmit();
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+    setTimeout(() => {
+        actualizeazaContorCnp();
+        actualizeazaDepartamente(false);
+        actualizeazaSubmit();
+        document.getElementById('wrap-img-2').style.display = 'none';
+        document.getElementById('wrap-img-3').style.display = 'none';
+        document.getElementById('msg-max-img').style.display = 'none';
+    }, 10);
+});
+</script>
+{% endblock %}

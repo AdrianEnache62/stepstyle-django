@@ -17,6 +17,45 @@
         <h1>Toate produsele</h1>
     {% endif %}
 
+    <form method="get" id="form-filtre" style="background: #f8f9fa; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
+        {% if sort %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        {% if coloana %}<input type="hidden" name="coloana" value="{{ coloana }}">{% endif %}
+        {% for t in taguri_active %}<input type="hidden" name="tag" value="{{ t }}">{% endfor %}
+
+        {% if form.non_field_errors %}
+            <div style="color: #dc2626; font-weight: bold; margin-bottom: 10px;">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px;">
+            {% for field in form %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% else %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" style="display: block; font-weight: 600; font-size: 0.85em;">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div style="color: #dc2626; font-size: 0.8em;">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 14px; display: flex; gap: 10px;">
+            <button type="submit" style="padding: 8px 16px; cursor: pointer;">Filtrează</button>
+            <button type="button" id="btn-reset-filtre" style="padding: 8px 16px; cursor: pointer; background: #e5e7eb; border: 1px solid #9ca3af;">Resetează filtrele</button>
+        </div>
+    </form>
+
+    <script>
+    document.getElementById('btn-reset-filtre').addEventListener('click', function () {
+        if (confirm('Atenție! Vei pierde toate filtrele aplicate. Ești sigur că vrei să resetezi?')) {
+            window.location.href = window.location.pathname;
+        }
+    });
+    </script>
+
     <form method="get" style="margin-bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         {% for t in taguri_active %}
             <input type="hidden" name="tag" value="{{ t }}">
@@ -61,6 +100,7 @@
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
             {% for prod in pagina.object_list %}
                 <div style="border: 2px solid {{ prod.categorie.culoare }}; border-radius: 10px; padding: 14px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
                     {% if prod.imagine_principala and prod.imagine_principala.imagine %}

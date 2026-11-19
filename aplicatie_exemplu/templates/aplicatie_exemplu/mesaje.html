@@ -1,0 +1,76 @@
+{% extends "aplicatie_exemplu/baza.html" %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 20px auto; padding: 0 16px;">
+    <h1>Mesaje primite</h1>
+
+    <form method="get" style="display: flex; gap: 12px; align-items: end; flex-wrap: wrap; background: #f8f9fa; padding: 14px; border-radius: 8px; margin-bottom: 20px;">
+        <div>
+            <label><strong>Departament:</strong></label><br>
+            <select name="departament" required>
+                <option value="">-- Alege departament --</option>
+                {% for d in departamente %}
+                    <option value="{{ d }}" {% if d == dep_selectat %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label><strong>Data (YYYY, YYYY-MM sau YYYY-MM-DD):</strong></label><br>
+            <input type="text" name="data" value="{{ data_filtru }}" placeholder="ex: 2026-11 sau 2026-11-19">
+        </div>
+        <button type="submit" style="padding: 6px 16px;">Caută mesaje</button>
+    </form>
+
+    {% if dep_selectat %}
+        {% if mesaje_gasite %}
+            {% for msg in mesaje_gasite %}
+                <div style="
+                    padding: 16px;
+                    margin-bottom: 16px;
+                    border-radius: 8px;
+                    background:
+                        {% if msg.tip_mesaj == 'reclamatie' %}#fff1f2
+                        {% elif msg.tip_mesaj == 'review' %}#ecfdf5
+                        {% elif msg.tip_mesaj == 'intrebare' %}#eff6ff
+                        {% elif msg.tip_mesaj == 'cerere' %}#fefce8
+                        {% else %}#f5f3ff{% endif %};
+                    border: {% if msg.urgent %}3px solid #dc2626{% else %}1px solid #cbd5e1{% endif %};
+                ">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <strong>Fișier: {{ msg.fisier }}</strong>
+                        <span>
+                            <span style="padding: 3px 10px; border-radius: 12px; background: #1f2937; color: #fff; font-size: 0.85em;">
+                                {{ msg.tip_mesaj|upper }}
+                            </span>
+                            {% if msg.urgent %}
+                                <span style="padding: 3px 10px; border-radius: 12px; background: #dc2626; color: #fff; font-size: 0.85em; margin-left: 6px;">
+                                    URGENT
+                                </span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse;">
+                        {% for cheie, valoare in msg.campuri %}
+                            <tr style="border-top: 1px solid rgba(0,0,0,0.08);">
+                                <td style="padding: 6px 10px; font-weight: bold; width: 220px;">{{ cheie }}</td>
+                                <td style="padding: 6px 10px;">
+                                    {% if cheie == 'mesaj' %}
+                                        {{ valoare|safe }}
+                                    {% else %}
+                                        {{ valoare }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Nu există mesaje salvate pentru departamentul <strong>{{ dep_selectat }}</strong> și data <strong>{{ data_filtru|default:"oricare" }}</strong>.</p>
+        {% endif %}
+    {% else %}
+        <p>Selectează un departament pentru a vizualiza mesajele.</p>
+    {% endif %}
+</div>
+{% endblock %}

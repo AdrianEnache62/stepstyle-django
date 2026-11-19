@@ -231,3 +231,26 @@ class Produs(models.Model):
     
     def get_absolute_url(self):
         return reverse('detaliu_produs', kwargs={'pk': self.pk})
+
+class Departament(models.Model):
+    nume = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        verbose_name = "Departament"
+        verbose_name_plural = "Departamente"
+
+    def __str__(self):
+        return self.nume
+
+
+class TipMesaj(models.Model):
+    nume = models.CharField(max_length=50, unique=True)
+    min_zile_asteptare = models.PositiveIntegerField(default=2)
+    departamente = models.ManyToManyField(Departament, related_name='tipuri_mesaje')
+
+    class Meta:
+        verbose_name = "Tip mesaj"
+        verbose_name_plural = "Tipuri mesaje"
+
+    def __str__(self):
+        return f"{self.nume} (min {self.min_zile_asteptare} zile)"

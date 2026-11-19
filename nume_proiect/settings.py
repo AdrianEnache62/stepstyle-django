@@ -153,3 +153,16 @@ DATE_FIRMA = {
 STOC_MIN = 5            
 PROD_PER_PAG = 5        
 K_PRODUSE_SIMILARE = 3  
+
+from django.contrib.messages import constants as message_constants
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+MESSAGE_LEVEL = message_constants.DEBUG
+
+MESSAGE_TAGS = {
+    message_constants.DEBUG: 'msg-debug',
+    message_constants.INFO: 'msg-info',
+    message_constants.SUCCESS: 'msg-success',
+    message_constants.WARNING: 'msg-warning',
+    message_constants.ERROR: 'msg-error',
+}

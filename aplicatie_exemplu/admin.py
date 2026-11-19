@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.utils.html import format_html
 from .models import (
+    Departament,
+    TipMesaj,
     Categorie,
     Brand,
     ImaginePrincipala,
@@ -133,3 +135,5 @@ admin.site.register(Marime, MarimeAdmin)
 admin.site.register(Material, MaterialAdmin)
 admin.site.register(Promotie, PromotieAdmin)
 admin.site.register(Produs, ProdusAdmin)
+admin.site.register(Departament)
+admin.site.register(TipMesaj)

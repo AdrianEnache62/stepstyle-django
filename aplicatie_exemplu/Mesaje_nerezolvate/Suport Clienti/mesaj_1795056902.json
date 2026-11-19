@@ -1,0 +1,20 @@
+{
+    "nume": "Adrian",
+    "prenume": "Adrian",
+    "cnp": "5060109100159",
+    "varsta": "20 de ani și 10 luni",
+    "email": "emailbun@gmail.com",
+    "telefon": "075325235",
+    "tip_mesaj": "intrebare",
+    "departament": "Suport Clienti",
+    "subiect": "Subiect",
+    "min_zile_asteptare": 4,
+    "mesaj": "<p>Salut. Adrian Adrian Adrian Adrian Adrian</p>",
+    "imagini": [],
+    "acord_gdpr": true,
+    "cod_cerere": "SS-816-QTvo5",
+    "urgent": false,
+    "ip": "127.0.0.1",
+    "data_sosire": "2026-11-19",
+    "ora_sosire": "04:55:02"
+}
