@@ -1,0 +1,35 @@
+{% extends "aplicatie_exemplu/baza.html" %}
+{% block content %}
+<div style="max-width: 700px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 10px;">
+    <h1>Profilul meu (date din sesiune)</h1>
+
+    <h3>Date utilizator</h3>
+    <ul>
+        <li><strong>Username:</strong> {{ date_user.username }}</li>
+        <li><strong>Nume:</strong> {{ date_user.last_name }}</li>
+        <li><strong>Prenume:</strong> {{ date_user.first_name }}</li>
+        <li><strong>E-mail:</strong> {{ date_user.email }}</li>
+        <li><strong>Telefon:</strong> {{ date_user.telefon|default:"-" }}</li>
+        <li><strong>Țară:</strong> {{ date_user.tara|default:"-" }}</li>
+        <li><strong>Județ:</strong> {{ date_user.judet|default:"-" }}</li>
+        <li><strong>Localitate:</strong> {{ date_user.localitate|default:"-" }}</li>
+        <li><strong>Stradă:</strong> {{ date_user.strada|default:"-" }}</li>
+    </ul>
+
+    <h3>Date profil</h3>
+    {% if date_profil %}
+        <ul>
+            <li><strong>Data nașterii:</strong> {{ date_profil.data_nasterii|default:"-" }}</li>
+            <li><strong>Mărime preferată:</strong> {{ date_profil.marime_preferata|default:"-" }}</li>
+            <li><strong>Bio:</strong> {{ date_profil.bio|default:"-" }}</li>
+        </ul>
+    {% else %}
+        <p>Nu ai completat încă datele de profil.</p>
+    {% endif %}
+
+    <div style="margin-top: 18px; display: flex; gap: 12px;">
+        <a href="{% url 'editare_profil' %}" style="padding: 8px 16px; background: #1e40af; color: #fff; text-decoration: none; border-radius: 6px;">Editează datele / profilul</a>
+        <a href="{% url 'schimbare_parola' %}" style="padding: 8px 16px; background: #374151; color: #fff; text-decoration: none; border-radius: 6px;">Schimbă parola</a>
+    </div>
+</div>
+{% endblock %}

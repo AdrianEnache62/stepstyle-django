@@ -102,6 +102,13 @@
                     <li><a href="{% url 'log' %}">Log</a></li>
                 </ul>
             </li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'profil' %}">Profil ({{ user.username }})</a></li>
+                <li><a href="{% url 'logout' %}">Logout</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Login</a></li>
+                <li><a href="{% url 'inregistrare' %}">Înregistrare</a></li>
+            {% endif %}
         </ul>
     </nav>
     </header>

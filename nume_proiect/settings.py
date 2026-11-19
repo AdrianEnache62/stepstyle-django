@@ -166,3 +166,5 @@ MESSAGE_TAGS = {
     message_constants.WARNING: 'msg-warning',
     message_constants.ERROR: 'msg-error',
 }
+
+AUTH_USER_MODEL = 'aplicatie_exemplu.CustomUser'

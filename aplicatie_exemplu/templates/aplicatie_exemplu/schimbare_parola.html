@@ -1,0 +1,12 @@
+{% extends "aplicatie_exemplu/baza.html" %}
+{% block content %}
+<div style="max-width: 500px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 10px;">
+    <h1>Schimbare parolă</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" style="padding: 10px 20px;">Actualizează parola</button>
+        <a href="{% url 'profil' %}" style="margin-left: 12px;">Înapoi la profil</a>
+    </form>
+</div>
+{% endblock %}

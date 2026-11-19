@@ -15,5 +15,11 @@ urlpatterns = [
     path("livrare_retur", views.in_lucru, name="livrare_retur"),
     path("log", views.in_lucru, name="log"),
     path("adauga-produs", views.adauga_produs, name="adauga_produs"),
+    path("inregistrare", views.inregistrare_view, name="inregistrare"),
+    path("login", views.login_view, name="login"),
+    path("logout", views.logout_view, name="logout"),
+    path("profil", views.profil_view, name="profil"),
+    path("profil/editare", views.editare_profil_view, name="editare_profil"),
+    path("profil/schimbare-parola", views.schimbare_parola_view, name="schimbare_parola"),
 ]
 

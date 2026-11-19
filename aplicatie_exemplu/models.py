@@ -2,6 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 
 class Categorie(models.Model):
@@ -234,6 +235,13 @@ class Produs(models.Model):
 
 class Departament(models.Model):
     nume = models.CharField(max_length=100, unique=True)
+    sef = models.ForeignKey(
+        'Angajat',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='departamente_conduse',
+    )
 
     class Meta:
         verbose_name = "Departament"
@@ -254,3 +262,113 @@ class TipMesaj(models.Model):
 
     def __str__(self):
         return f"{self.nume} (min {self.min_zile_asteptare} zile)"
+
+class CustomUser(AbstractUser):
+    telefon = models.CharField(max_length=15, blank=True, default='')
+    tara = models.CharField(max_length=60, default='România')
+    judet = models.CharField(max_length=60, blank=True, default='')
+    localitate = models.CharField(max_length=80, blank=True, default='')
+    strada = models.CharField(max_length=120, blank=True, default='')
+
+    class Meta:
+        verbose_name = "Utilizator"
+        verbose_name_plural = "Utilizatori"
+
+    def __str__(self):
+        return self.username
+
+
+class Profil(models.Model):
+    utilizator = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profil')
+    data_nasterii = models.DateField(null=True, blank=True)
+    marime_preferata = models.PositiveIntegerField(null=True, blank=True)
+    bio = models.TextField(blank=True, default='')
+
+    class Meta:
+        verbose_name = "Profil"
+        verbose_name_plural = "Profiluri"
+
+    def __str__(self):
+        return f"Profil {self.utilizator.username}"
+
+
+class Angajat(models.Model):
+    utilizator = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='angajat')
+    departament = models.ForeignKey(Departament, on_delete=models.SET_NULL, null=True, related_name='angajati')
+    functie = models.CharField(max_length=80)
+    salariu = models.DecimalField(max_digits=8, decimal_places=2)
+    data_angajarii = models.DateField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Angajat"
+        verbose_name_plural = "Angajați"
+
+    def __str__(self):
+        return f"{self.utilizator.username} - {self.functie}"
+
+
+class Comanda(models.Model):
+    STATUS_CHOICES = [
+        ('noua', 'Nouă'),
+        ('procesare', 'În procesare'),
+        ('expediata', 'Expediată'),
+        ('livrata', 'Livrată'),
+        ('anulata', 'Anulată'),
+    ]
+    utilizator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='comenzi')
+    produse = models.ManyToManyField(Produs, through='ProdusComanda', related_name='comenzi')
+    data_inregistrare = models.DateTimeField(auto_now_add=True)
+    prin_curier = models.BooleanField(default=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='noua')
+    adresa_livrare = models.CharField(max_length=200)
+
+    class Meta:
+        verbose_name = "Comandă"
+        verbose_name_plural = "Comenzi"
+
+    def __str__(self):
+        return f"Comanda #{self.pk} ({self.utilizator.username})"
+
+
+class ProdusComanda(models.Model):
+    comanda = models.ForeignKey(Comanda, on_delete=models.CASCADE)
+    produs = models.ForeignKey(Produs, on_delete=models.CASCADE)
+    cantitate = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        unique_together = ('comanda', 'produs')
+
+
+class Review(models.Model):
+    utilizator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reviewuri')
+    produs = models.ForeignKey(Produs, on_delete=models.CASCADE, related_name='reviewuri')
+    rating = models.PositiveSmallIntegerField()
+    comentariu = models.TextField()
+    data_adaugare = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Review {self.rating}/5 - {self.produs.nume}"
+
+
+class Voucher(models.Model):
+    utilizator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='vouchere')
+    cod = models.CharField(max_length=30, unique=True)
+    procent_reducere = models.PositiveSmallIntegerField()
+    data_expirare = models.DateField()
+    folosit = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.cod} (-{self.procent_reducere}%)"
+
+
+class ProdusFavorit(models.Model):
+    utilizator = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='favorite')
+    produs = models.ForeignKey(Produs, on_delete=models.CASCADE, related_name='favorit_de')
+    data_adaugare = models.DateTimeField(auto_now_add=True)
+    notita = models.CharField(max_length=150, blank=True, default='')
+
+    class Meta:
+        unique_together = ('utilizator', 'produs')
+
+    def __str__(self):
+        return f"{self.utilizator.username} ❤ {self.produs.nume}"

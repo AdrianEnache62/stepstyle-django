@@ -5,3 +5,5 @@ http://127.0.0.1:8000/aplicatie_exemplu/info?data=zi
 http://127.0.0.1:8000/aplicatie_exemplu/info?data=timp
 http://127.0.0.1:8000/aplicatie_exemplu/adauga-produs
 http://127.0.0.1:8000/aplicatie_exemplu/mesaje
+http://127.0.0.1:8000/aplicatie_exemplu/inregistrare
+http://127.0.0.1:8000/aplicatie_exemplu/login

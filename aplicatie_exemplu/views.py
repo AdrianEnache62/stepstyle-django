@@ -14,6 +14,11 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, get_object_or_404
 from .models import Produs, Categorie
 
+from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from .models import Profil
+from .forms import InregistrareForm, LoginPersonalizatForm, EditareDateForm
 from decimal import Decimal
 from django.shortcuts import redirect
 from .forms import ProdusModelForm
@@ -329,7 +334,6 @@ def contact_view(request):
             cd = form.cleaned_data
             tip_obj = TipMesaj.objects.get(nume=cd['tip_mesaj'])
 
-            # Preprocesari cerute
             ani, luni = calculeaza_varsta_ani_luni(cd['data_nasterii'])
             varsta_str = f"{ani} de ani și {luni} luni"
             mesaj_html = _preproceseaza_mesaj_html(cd['mesaj'])
@@ -459,3 +463,155 @@ def adauga_produs(request):
         form = ProdusModelForm()
 
     return render(request, 'aplicatie_exemplu/adauga_produs.html', {'form': form})
+
+
+def _salveaza_date_user_in_sesiune(request, user):
+    """Salvează datele utilizatorului (și ale profilului, dacă există) în sesiune."""
+    date_user = {
+        'username': user.username,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'email': user.email,
+        'telefon': user.telefon,
+        'tara': user.tara,
+        'judet': user.judet,
+        'localitate': user.localitate,
+        'strada': user.strada,
+    }
+    date_profil = None
+    try:
+        p = user.profil
+        date_profil = {
+            'data_nasterii': str(p.data_nasterii) if p.data_nasterii else '',
+            'marime_preferata': p.marime_preferata if p.marime_preferata is not None else '',
+            'bio': p.bio,
+        }
+    except Profil.DoesNotExist:
+        date_profil = None
+
+    request.session['date_user'] = date_user
+    request.session['date_profil'] = date_profil
+
+
+def inregistrare_view(request):
+    if request.method == 'POST':
+        form = InregistrareForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            dn = form.cleaned_data.get('data_nasterii')
+            marime = form.cleaned_data.get('marime_preferata')
+            bio = (form.cleaned_data.get('bio') or '').strip()
+            if dn or marime is not None or bio:
+                Profil.objects.create(
+                    utilizator=user,
+                    data_nasterii=dn,
+                    marime_preferata=marime,
+                    bio=bio,
+                )
+            messages.success(request, "Contul a fost creat cu succes! Te poți autentifica acum.")
+            return redirect('login')
+        else:
+            messages.error(request, "Formularul de înregistrare conține erori.")
+    else:
+        form = InregistrareForm()
+    return render(request, 'aplicatie_exemplu/inregistrare.html', {'form': form})
+
+
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginPersonalizatForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            if form.cleaned_data.get('tine_ma_minte'):
+                request.session.set_expiry(86400)
+            else:
+                request.session.set_expiry(0)
+
+            _salveaza_date_user_in_sesiune(request, user)
+            messages.success(request, f"Bine ai revenit, {user.username}!")
+            return redirect('profil')
+        else:
+            messages.error(request, "Username sau parolă incorectă.")
+    else:
+        form = LoginPersonalizatForm()
+    return render(request, 'aplicatie_exemplu/login.html', {'form': form})
+
+
+def logout_view(request):
+    logout(request)
+    messages.info(request, "Te-ai deconectat cu succes.")
+    return redirect('index')
+
+
+@login_required(login_url='login')
+def profil_view(request):
+    if 'date_user' not in request.session:
+        _salveaza_date_user_in_sesiune(request, request.user)
+    return render(request, 'aplicatie_exemplu/profil.html', {
+        'date_user': request.session.get('date_user'),
+        'date_profil': request.session.get('date_profil'),
+    })
+
+
+@login_required(login_url='login')
+def editare_profil_view(request):
+    user = request.user
+    try:
+        profil_existent = user.profil
+    except Profil.DoesNotExist:
+        profil_existent = None
+
+    if request.method == 'POST':
+        form = EditareDateForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            dn = form.cleaned_data.get('data_nasterii')
+            marime = form.cleaned_data.get('marime_preferata')
+            bio = (form.cleaned_data.get('bio') or '').strip()
+
+            if profil_existent:
+                profil_existent.data_nasterii = dn
+                profil_existent.marime_preferata = marime
+                profil_existent.bio = bio
+                profil_existent.save()
+            elif dn or marime is not None or bio:
+                Profil.objects.create(
+                    utilizator=user,
+                    data_nasterii=dn,
+                    marime_preferata=marime,
+                    bio=bio,
+                )
+
+            _salveaza_date_user_in_sesiune(request, user)
+            messages.success(request, "Datele tale au fost actualizate cu succes!")
+            return redirect('profil')
+        else:
+            messages.error(request, "Verifică erorile din formular.")
+    else:
+        initial_profil = {}
+        if profil_existent:
+            initial_profil = {
+                'data_nasterii': profil_existent.data_nasterii,
+                'marime_preferata': profil_existent.marime_preferata,
+                'bio': profil_existent.bio,
+            }
+        form = EditareDateForm(instance=user, initial=initial_profil)
+
+    return render(request, 'aplicatie_exemplu/editare_profil.html', {'form': form})
+
+
+@login_required(login_url='login')
+def schimbare_parola_view(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, "Parola a fost schimbată cu succes!")
+            return redirect('profil')
+        else:
+            messages.error(request, "Nu s-a putut schimba parola. Verifică erorile.")
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'aplicatie_exemplu/schimbare_parola.html', {'form': form})

@@ -5,6 +5,8 @@ from datetime import date
 from django.core.exceptions import ValidationError
 from .models import Departament, TipMesaj
 
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .models import CustomUser, Profil
 from datetime import date
 from django import forms
 from .models import Categorie, Brand, Marime, Material, Promotie, Produs
@@ -439,7 +441,6 @@ class ContactForm(forms.Form):
 from decimal import Decimal
 
 
-# --- Validatoare externe pentru Task 4 (ModelForm) ---
 
 def valideaza_fara_caractere_interzise(value):
     """Validator extern 1 (folosit pe două câmpuri: nume și descriere)."""
@@ -547,3 +548,110 @@ class ProdusModelForm(forms.ModelForm):
                     f"Prețul final calculat ({pret_final:.2f} RON) depășește plafonul maxim de 5000 RON al magazinului."
                 )
         return cleaned
+
+
+class InregistrareForm(UserCreationForm):
+    # Câmpuri opționale din Profil
+    data_nasterii = forms.DateField(
+        required=False,
+        label="Data nașterii (opțional)",
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
+    marime_preferata = forms.IntegerField(
+        required=False,
+        min_value=18,
+        max_value=52,
+        label="Mărime preferată EU (opțional)",
+    )
+    bio = forms.CharField(
+        required=False,
+        label="Despre mine / Bio (opțional)",
+        widget=forms.Textarea(attrs={'rows': 3}),
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'telefon',
+            'tara',
+            'judet',
+            'localitate',
+            'strada',
+            'password1',
+            'password2',
+        ]
+        labels = {
+            'first_name': 'Prenume',
+            'last_name': 'Nume',
+            'email': 'E-mail',
+            'telefon': 'Telefon',
+            'tara': 'Țară',
+            'judet': 'Județ',
+            'localitate': 'Localitate',
+            'strada': 'Stradă',
+        }
+
+    def clean_telefon(self):
+        tel = (self.cleaned_data.get('telefon') or '').strip()
+        if tel and not re.fullmatch(r'\+?\d{10,15}', tel):
+            raise ValidationError("Telefonul trebuie să conțină 10-15 cifre (opțional cu '+' la început).")
+        return tel
+
+    def clean_tara(self):
+        tara = (self.cleaned_data.get('tara') or '').strip()
+        if len(tara) < 2 or not re.fullmatch(r'[A-Za-zĂÂÎȘȚăâîșț\s\-]+', tara):
+            raise ValidationError("Țara trebuie să conțină doar litere (minim 2 caractere).")
+        return tara
+
+    def clean_judet(self):
+        judet = (self.cleaned_data.get('judet') or '').strip()
+        if judet:
+            if not judet[0].isupper():
+                raise ValidationError("Județul trebuie să înceapă cu literă mare.")
+            if not re.fullmatch(r'[A-Za-zĂÂÎȘȚăâîșț\s\-]+', judet):
+                raise ValidationError("Județul poate conține doar litere, spații și cratime.")
+        return judet
+
+
+class LoginPersonalizatForm(AuthenticationForm):
+    tine_ma_minte = forms.BooleanField(
+        required=False,
+        label="Ține-mă logat timp de 1 zi",
+    )
+
+
+class EditareDateForm(forms.ModelForm):
+    data_nasterii = forms.DateField(
+        required=False,
+        label="Data nașterii",
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
+    marime_preferata = forms.IntegerField(
+        required=False,
+        min_value=18,
+        max_value=52,
+        label="Mărime preferată EU",
+    )
+    bio = forms.CharField(
+        required=False,
+        label="Despre mine / Bio",
+        widget=forms.Textarea(attrs={'rows': 3}),
+    )
+
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'telefon', 'tara', 'judet', 'localitate', 'strada']
+        labels = {
+            'first_name': 'Prenume',
+            'last_name': 'Nume',
+            'email': 'E-mail',
+            'telefon': 'Telefon',
+            'tara': 'Țară',
+            'judet': 'Județ',
+            'localitate': 'Localitate',
+            'strada': 'Stradă',
+        }
